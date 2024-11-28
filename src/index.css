@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*,
+body {
+  /* font-family: "Quicksand", sans-serif; */
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+/* customer popover ant */
+.ant-popover-title {
+  margin-bottom: 0 !important;
+  width: fit-content !important;
+  min-width: 100px !important;
+}
+/* custome antd modal */
+.ant-modal-footer > button:nth-child(1) {
+  color: var(--third-color);
+  padding: 16px 20px;
+  background-color: var(--secondary-color) !important;
+  transition: all 0.2s linear;
+}
+.ant-modal-footer > button:nth-child(1):hover {
+  opacity: 0.8 !important;
+  border-color: transparent !important;
+  color: var(--third-color) !important;
+}
+.ant-modal-footer > button:nth-child(2) {
+  color: #fff;
+  padding: 16px 20px;
+  background-color: var(--danger-color) !important;
+  transition: all 0.2s linear;
+}
+.ant-modal-footer > button:nth-child(2):hover {
+  opacity: 0.8 !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.correct_key {
+  background-color: #1e40ae !important;
+  color: white;
+}
+/* .key_input {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: black;
+  border-bottom: 2px solid #000; 
+  overflow: hidden;
+  width: 0;
+} */
+.shadow-round {
+  box-shadow: var(--shadow-round);
+}
+.text-fourth {
+  color: var(--fourth-color);
+}
+.bg-color {
+  color: var(--bg-color);
+}
