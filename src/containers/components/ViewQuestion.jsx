@@ -6,7 +6,7 @@ import styled from 'styled-components';
 const ViewQuestion = ({data, setQuestions}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [input, setInput] = useState(data.content);
-    const [answers, setAnswers] = useState(data.choice);
+    const [answers, setAnswers] = useState(data.answers);
     const keyRefs = useRef([]);
     const addToRefs = useCallback((el) => {
       if (el && !keyRefs.current.includes(el)) {
@@ -28,7 +28,7 @@ const ViewQuestion = ({data, setQuestions}) => {
         return 1;
       }
       setQuestions((state) => {
-        return state.map((q) => (q.id === data.id ? { ...q, ["content"]: input , choice: answers} : q))
+        return state.map((q) => (q.id === data.id ? { ...q, ["content"]: input , answers: answers} : q))
       })
       setIsModalOpen(false);
 
@@ -67,7 +67,7 @@ const ViewQuestion = ({data, setQuestions}) => {
                   </div>
                   <div className="flex flex-col gap-2">
                     {
-                        data.choice.map((as, index) => (
+                        data.answers.map((as, index) => (
                             <div className="" key={as.key}  >
                                 <div className="w-full group ">
                                     <button type='button' className={`hover:translate-y-[-3px] transition-all ease-linear duration-100 text-[12px] font-bold mr-2 uppercase w-8 h-8 rounded-full border hover:bg-[#1e40ae] hover:text-white ${as.isCorrect ? 'correct_key' : ' '} `} 

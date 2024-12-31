@@ -1,13 +1,58 @@
-import React from 'react'
+import React, { useEffect, useState} from 'react'
 import styled from 'styled-components'
 import icons from '../../../utils/icons'
 import { Popover, Button } from 'antd'  
-// const content = (
-//     <div>
-//       Danh sách lớp
-//     </div>
-//   );
+import { Outlet, useLocation } from 'react-router-dom'
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
+import setAuthToken from '../../../helpers/setAuthToken'
+import { useDispatch, useSelector } from 'react-redux'
+import { setInfo } from '../../../redux-toolkit/slices/auth.slice'
+import { currentUser } from '../../../redux-toolkit/selector/auth.selector'
+import { NavLink } from 'react-router-dom'
 const Master = () => {
+    const location = useLocation();
+    const currentUserData = useSelector(currentUser);
+    const dispatch = useDispatch();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+      };
+      const handleClose = () => {
+        setAnchorEl(null);
+      };
+      const handleLogout = () => {
+        setAnchorEl(null);
+        if(localStorage.getItem("auth-token"))
+        {
+          localStorage.removeItem("auth-token");
+        }
+        setAuthToken(null);
+        dispatch(setInfo( {
+          fullName: null,
+          role: null,
+          isLogin: false,
+      }));
+      navigate("/vi/auth/login");
+      };
+    useEffect(() => {
+        if (localStorage["auth-token"]) {
+            setAuthToken(localStorage["auth-token"]);
+          } else {
+            setAuthToken(null);
+          }
+    },[localStorage["auth-token"]]);
   return (
     <MasterStyled >
      <div className="room_place flex ">
@@ -19,13 +64,24 @@ const Master = () => {
 
             </div>
             <div className="side-nav__devider my-6"></div>
-            <div className="h-[50px] w-[120px] rounded-full pl-5 relative bg-[rgb(241,245,249)] flex items-center justify-start">
-                <Popover title="Danh sách lớp" placement='right'>
-                <icons.grid className='text-[#1e40ae] text-[30px] cursor-pointer'></icons.grid>
-                </Popover>
-                <div className="top absolute"></div>
-                <div className="bottom absolute"></div>
-            </div>
+                <NavLink  to={"/vi/student/classroom"}   className={({isActive}) => {
+                    return (
+                        "h-[50px] w-[100px] rounded-full pl-5 relative flex items-center justify-start mt-[20px] transition-all ease-linear duration-100 " + (isActive && location.pathname !== "/vi/student/view-progress" ? "current_page " : "text-[#fff]")
+                    )
+                }}>
+                    <Popover title={"Danh sách lớp đã tham gia"} placement='right'>
+                        <icons.grid className='text-[30px] cursor-pointer'></icons.grid>
+                    </Popover>
+                </NavLink>
+                <NavLink  to={"/vi/student/view-progress"} className={({isActive}) => {
+                    return (
+                        "h-[50px] w-[100px] rounded-full pl-5 relative flex items-center justify-start mt-[20px] transition-all ease-linear duration-100 " + (isActive ? "current_page " : "text-[#fff]")
+                    )
+                }}>
+                    <Popover title={"Tiến độ học tập"} placement='right'>
+                        <icons.progress className='text-[30px] cursor-pointer'></icons.progress>
+                    </Popover>
+                </NavLink>
             
         </div>
         <div className="room_sight flex-auto h-full px-[22px] pb-5">
@@ -35,19 +91,106 @@ const Master = () => {
                         <icons.ring className='text-[20px]'></icons.ring>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="avt w-[32px] h-[32px] rounded-full overflow-hidden cursor-pointer">
+                    <>
+                        <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+
+        <Tooltip title="Account settings">
+          <IconButton
+            onClick={handleClick}
+            size="small"
+            sx={{ ml: 2 }}
+            aria-controls={open ? 'account-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+          >
+                    <div className="avt w-[32px] h-[32px] rounded-full overflow-hidden cursor-pointer">
                             <img src="https://cdn.pixabay.com/photo/2024/05/07/06/38/shiny-gold-rose-beetle-8744981_640.jpg" alt="" className='w-full h-full object-cover' />
                         </div>
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              '&::before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={handleClose}>
+        <div className="flex items-center gap-3">
+            <div className="avt w-[32px] h-[32px] rounded-full overflow-hidden cursor-pointer">
+                <img src="https://cdn.pixabay.com/photo/2024/05/07/06/38/shiny-gold-rose-beetle-8744981_640.jpg" alt="" className='w-full h-full object-cover' />
+            </div>
+            <div className="info flex flex-col  justify-start ">
+                            <span className="text-[#1e293b] font-medium capitalize">{currentUserData?.fullName}</span>
+                            <span className="text-[12px] text-[#475569]">{currentUserData?.role}</span>
+            </div>
+
+        </div>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+            <PersonAdd fontSize="small" />
+          </ListItemIcon>
+          Add another account
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+            <Settings fontSize="small" />
+          </ListItemIcon>
+          Settings
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
+                        </>
+                       
                         <div className="info flex flex-col  justify-start ">
-                            <span className="text-[#1e293b] font-medium capitalize">nguyen van yen</span>
-                            <span className="text-[12px] text-[#475569]">Hoc Sinh</span>
+                            <span className="text-[#1e293b] font-medium capitalize">{currentUserData.fullName}</span>
+                            <span className="text-[12px] text-[#475569]">Học sinh</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div className="side-nav__devider my-6"></div>
-
+            <Outlet/>
         </div>
+
      </div>
      <div className="setting fixed bottom-[50px] left-[40px] cursor-pointer">
         <icons.setting className='text-white text-[30px]'></icons.setting>

@@ -2,7 +2,12 @@ import React,{useState} from 'react'
 import styled from 'styled-components'
 import icons from '../../../utils/icons';
 import { Pagination, Select ,Modal, Radio, Space} from 'antd';
-
+import { useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {getRequestMembership} from "../../../api/teacher/membership"
+import {Loading} from "../../components/index"
+import timestamp from '../../../helpers/timestamp';
+import {putRequest} from "../../../api/teacher/membership";
 const fakeData =  [
     {
         id: 1,
@@ -48,10 +53,10 @@ const fakeData =  [
     }
 ];
 const options = [
-    {
-        label:"Từ chối",
-        value: "disapproved"
-    },
+    // {
+    //     label:"Từ chối",
+    //     value: "disapproved"
+    // },
     {
         label:"Duyệt vào lớp",
         value: "approve"
@@ -59,14 +64,21 @@ const options = [
 ]
 
 const ManageStudent = () => {
-
+    const queryClient = useQueryClient();
+    const params = useParams();
     const [openModalId, setOpenModalId] = useState(null);
-    const [selectedOption, setSelectedOption] = useState({});
-    const [data,setData] = useState(fakeData.slice(0,3)); 
+    const [membershipId, setMembershipId] = useState(null);
+
+    const [selectedOption, setSelectedOption] = useState("approve");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(3);
+
+    // const [data,setData] = useState(fakeData.slice(0,3)); 
     const showModal = (id) => {
         setOpenModalId(id);
     };
-    const handleOk = () => {
+    const handleOk = (membershipId) => {
+        mutation.mutate(membershipId);
         setOpenModalId(null);
     };
 
@@ -78,19 +90,41 @@ const ManageStudent = () => {
       };
 
     const handleChangePagination = (page, pageSize) => {
-        console.log(page); 
-        console.log(pageSize); 
-        const startIndex = (page - 1) * pageSize;
-        const currentData = fakeData.slice(startIndex, startIndex + pageSize);
-        setData(currentData);
+        setCurrentPage(page);
+        setPageSize(pageSize)
+        // const startIndex = (page - 1) * pageSize;
+        // const currentData = fakeData.slice(startIndex, startIndex + pageSize);
+        // setData(currentData);
     }
-    const onRadioChange = (id, value) => {
-        setSelectedOption((prev) => ({
-            ...prev,
-            [id]: value,
-        }));
+    const onRadioChange = (value) => {
+        setSelectedOption(value);
     };
-
+    const { isPending, isError, data, error } = useQuery({ 
+        queryKey: ['membership', params.classroomId],
+        queryFn: () => getRequestMembership(params.classroomId) ,
+        enabled: !!params.classroomId
+    })
+    const mutation = useMutation({
+        mutationFn: putRequest,
+        onSuccess: (data) => {
+            console.log(data);
+            queryClient.invalidateQueries({queryKey: ['membership']})
+        } ,
+    onError : (error) => {
+      console.log(error)
+    }
+    })
+    if (isPending) {
+        return <Loading></Loading>
+      }
+      if (isError) {
+        return <span>Error: {error.message}</span>
+      }
+      const currentData = data.data.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+      );
+    //   console.log(data.data);
   return (
     <ManageStudentStyled>
          
@@ -148,12 +182,12 @@ const ManageStudent = () => {
                 <div className='whitespace-nowrap  font-bold  w-[20%]'>Thông tin học sinh</div>
                 <div className='whitespace-nowrap  font-bold  w-[20%]'>Email</div>
                 <div className='whitespace-nowrap  font-bold  flex-none w-[15%] '>Trạng thái</div>
-                <div className='whitespace-nowrap  font-bold  flex-none w-[20%]'>Thời gian gửi yêu cầu</div>
+                <div className='whitespace-nowrap  font-bold  flex-none w-[25%]'>Thời gian gửi yêu cầu</div>
                 <div className='whitespace-nowrap  font-bold   flex-none w-[10%]'>Lớp tham gia</div>
                 <div className='whitespace-nowrap  font-bold  flex-auto text-center'>Thao tác</div>
             </div>
             {
-                data?.map((student) => (
+                currentData?.map((student) => (
                     <>
                         <div className='flex items-center  py-4 px-3 product' key={student.id}>
                             <label className='flex-none w-[5%]'>
@@ -169,41 +203,44 @@ const ManageStudent = () => {
                                 <div className='w-8 h-8 flex-shrink-0 rounded-full overflow-hidden'>
                                     <img src='https://cdn.pixabay.com/photo/2024/07/08/05/41/girl-8880144_640.png' className='w-full h-full object-cover'></img>
                                 </div>
-                                <div className='ellipsis_2_lines text-[14px]'>{student.name}</div>
+                                <div className='ellipsis_2_lines text-[14px]'>{student.studentInfo.userName}</div>
                             </div>
                             <div className='   w-[20%] flex items-center gap-2'>
-                            {student.email}
+                            {student.studentInfo.email}
                             </div>
                             <div className='  flex-none w-[15%]'>
                                 {
-                                    student.state === "approved" ? <><span className={`whitespace-nowrap  font-bold text-[#2bc38d] flex items-center gap-2  w-fit px-2 py-1  rounded-[99px] bg-customGreen`}>
+                                    student.isApproved  ? <><span className={`whitespace-nowrap  font-bold text-[#2bc38d] flex items-center gap-2  w-fit px-2 py-1  rounded-[99px] bg-customGreen`}>
                                     <span className="dot w-2 h-2 rounded-[50%] bg-[#2bc38d] "></span>
                                     <span className='text-[12px]'>
                                         Đã duyệt
                                     </span>
-                                </span></> : student.state === "ongo" ? <span className='whitespace-nowrap  font-bold text-[#e5ac1a] flex items-center gap-2 bg-customYellow w-fit px-2 py-1  rounded-[99px]'>
+                                </span></> : <span className='whitespace-nowrap  font-bold text-[#e5ac1a] flex items-center gap-2 bg-customYellow w-fit px-2 py-1  rounded-[99px]'>
                                     <span className="dot w-2 h-2 rounded-[50%] bg-[#e5ac1a] "></span>
                                     <span className='text-[12px]'>
                                         Chờ phê duyệt
                                     </span>
-                                </span> :<span className='whitespace-nowrap  font-bold text-[#c73231] flex items-center gap-2 bg-customRed w-fit px-2 py-1  rounded-[99px]'>
+                                </span> 
+                                }
+                                {/* <span className='whitespace-nowrap  font-bold text-[#c73231] flex items-center gap-2 bg-customRed w-fit px-2 py-1  rounded-[99px]'>
                                     <span className="dot w-2 h-2 rounded-[50%] bg-[#c73231] "></span>
                                     <span className='text-[12px]'>
                                         Đã từ chối
                                     </span>
-                                </span>
-                                }
+                                </span> */}
                             </div>
-                            <div className='whitespace-nowrap    flex-none w-[20%] text-[14px]'>{student.requestDay}</div>
-                            <div className='whitespace-nowrap     flex-none w-[10%]'>Lớp học thầy lộc</div>
+                            <div className='whitespace-nowrap    flex-none w-[25%] text-[14px]'>{timestamp(student.sendAt)}</div>
+                            <div className='whitespace-nowrap     flex-none w-[10%]'>{student.className}</div>
                             <div className='whitespace-nowrap    flex-auto text-center'>
                                     <div className='text-[24px] cursor-pointer text-[#9fa4b1] pr-3 items-center w-full flex justify-center' onClick={() => showModal(student.id)}>
                                         <icons.view className='text-black text-[14px]'></icons.view>
                                     </div>                     
-                                    <Modal title={`Thông tin : ${student.name}`} open={openModalId === student.id} onOk={handleOk} onCancel={handleCancel} >
+                                    <Modal title={`Thông tin : ${student.studentInfo.userName}`} open={openModalId === student.id} onOk={() => {
+                                        handleOk(student.id)
+                                    }} onCancel={handleCancel} >
                                         <Radio.Group
-                                            onChange={(e) => onRadioChange(student.id, e.target.value)}
-                                            value={selectedOption[student.id]}                                           
+                                            onChange={(e) => onRadioChange( e.target.value)}
+                                            value={selectedOption}                                           
                                         >
                                             <Space direction='vertical'>
                                                 {options.map((state) => (
@@ -223,7 +260,7 @@ const ManageStudent = () => {
             }
         </div>
         <div className='pagination mt-4  w-[100%] flex  justify-end'>
-            <Pagination  total={20} defaultPageSize={3}  onChange={handleChangePagination} defaultCurrent={1}
+            <Pagination  total={data.data.length} defaultPageSize={3}  onChange={handleChangePagination} defaultCurrent={1}
             showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} học sinh`}
             showSizeChanger
             pageSizeOptions={[3,5,10,15]}

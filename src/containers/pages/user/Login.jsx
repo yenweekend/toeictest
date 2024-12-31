@@ -1,15 +1,59 @@
 import { useState , useCallback} from "react"
 import React from 'react'
 import {Logo,Loading} from "../../components";
+import { useMutation } from "@tanstack/react-query";
+import {login } from "../../../api/auth"
+import setAuthToken from "../../../helpers/setAuthToken"
+import { useNavigate } from "react-router-dom";
+import {setInfo} from "../../../redux-toolkit/slices/auth.slice";
+import {warnToastify ,errorToastify} from "../../../helpers/Toastify";
+import { useDispatch } from "react-redux";
 const Login = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: "", password: ""
       });
+    const [error, setError] = useState({
+        emailError: "", passwordError: ""
+      });
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    
     const handleChange = useCallback((e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
       },[formData]);
+    const mutation = useMutation({
+      mutationFn: login,
+      onSuccess : (data) => {
+        console.log(data.data)
+        localStorage.setItem("auth-token", data.data.token);
+        setAuthToken(data?.data?.token);
+        dispatch(setInfo({isLogin: true,fullName: data.data.fullName, role: data.data.role}))
+        if(data.data.role === "Teacher")
+        {
+          navigate("/vi/admin/student/manage-classroom")
+        }else if(data.data.role === "Student"){
+          console.log("tao vao")
+          navigate("/vi/student/classroom")
+        }
+      },
+      onError : (error) => {
+        errorToastify("Sai mật khẩu hoặc email vui lòng nhập lại")
+        console.log(error.message)
+      }
+    });
+    const handleLogin = useCallback((e) => {
+      e.preventDefault();
+      const isEmpty = Object.values(formData).some((value) => value === "");
+      if(isEmpty)
+      {
+        warnToastify("Không để trường trống");
+      }else
+      {
+        // if(Object.values(formData))
+        mutation.mutate(formData);
+      }
+     
+    },[formData]);
   return (
     <div className="font-[sans-serif]">
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -38,6 +82,24 @@ const Login = () => {
                   </svg>
                 </div>
               </div>
+              
+              {/* <div>
+                <label className="text-gray-800 text-xs block mb-2">Username</label>
+                <div className="relative flex items-center">
+                  <input name="userName" type="text" required className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none" placeholder="Enter email" autoComplete='off' onChange={handleChange}/>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2" viewBox="0 0 682.667 682.667">
+                    <defs>
+                      <clipPath id="a" clipPathUnits="userSpaceOnUse">
+                        <path d="M0 512h512V0H0Z" data-original="#000000"></path>
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#a)" transform="matrix(1.33 0 0 -1.33 0 682.667)">
+                      <path fill="none" strokeMiterlimit="10" strokeWidth="40" d="M452 444H60c-22.091 0-40-17.909-40-40v-39.446l212.127-157.782c14.17-10.54 33.576-10.54 47.746 0L492 364.554V404c0 22.091-17.909 40-40 40Z" data-original="#000000"></path>
+                      <path d="M472 274.9V107.999c0-11.027-8.972-20-20-20H60c-11.028 0-20 8.973-20 20V274.9L0 304.652V107.999c0-33.084 26.916-60 60-60h392c33.084 0 60 26.916 60 60v196.653Z" data-original="#000000"></path>
+                    </g>
+                  </svg>
+                </div>
+              </div> */}
 
               <div className="mt-8">
                 <label className="text-gray-800 text-xs block mb-2">Password</label>
@@ -69,7 +131,7 @@ const Login = () => {
               </div>
 
               <div className="mt-12">
-                <button type="button" className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                <button type="button" className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none" onClick={handleLogin}>
                   Đăng nhập
                 </button>
               </div>
@@ -116,7 +178,7 @@ const Login = () => {
           </div>
         </div>
       </div>
-      <Loading/>
+      {/* <Loading/> */}
     </div>
   )
 }

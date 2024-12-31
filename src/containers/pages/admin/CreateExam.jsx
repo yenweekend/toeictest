@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import {roundUpToMultipleOfFour} from "../../../helpers/functions";
-import {errorToastify, warnToastify} from "../../../helpers/Toastify";
+import {errorToastify, warnToastify, successToastify} from "../../../helpers/Toastify";
 import icons from '../../../utils/icons';
-import { Popover , Modal} from 'antd';
 import { ViewQuestion } from '../../components';
-let timeOut ;
+import { useNavigate, useNavigation, useParams } from 'react-router-dom';
+import {createquestion} from "../../../api/teacher/class"
+import { useMutation } from '@tanstack/react-query';
 const CreateExam = () => {
-
+  const navigate = useNavigate();
+  const params = useParams();
+  const [examcode, setExamCode ] = useState(null);
   const [numberQuestion, setNumberQuestion] = useState(8);
   const [questions, setQuestions] = useState([]);
   const numberQuestionEachColumn = useMemo(() => {
@@ -16,6 +19,33 @@ const CreateExam = () => {
     return distance < 4 ? 4 : distance;
   },[numberQuestion]);
   const inputNumberRef = useRef();
+  const mutation = useMutation({
+    mutationFn: createquestion,
+    onSuccess : (data) => {
+      console.log(data.data)
+      queryClient.invalidateQueries({ queryKey: ['questiontest'] })
+
+    },
+    onError : (error) => {
+      console.log(error)
+    }
+  });
+  const handleCreateTest = useCallback(() => {
+    const formData = {
+      testId: examcode, 
+      questions : questions
+    }
+    const flag = questions.every(question => question.content.trim() !== '');
+    if(flag)
+    {
+      mutation.mutate(formData);
+      successToastify("Thêm câu hỏi vào đề thành công");
+      navigate("/vi/admin/student/manage-classroom/");
+    }else
+    {
+      warnToastify("Hãy điền hết câu hỏi");
+    }
+  },[questions]);
   useEffect(() => {
     const arr = [];
     for(let i = 0 ; i < numberQuestion; i++)
@@ -23,7 +53,7 @@ const CreateExam = () => {
       arr.push({
         id: i + 1, // render ui 
         content:"",
-        choice: [
+        answers: [
           {
             key:"a",
             content:"",
@@ -70,7 +100,7 @@ const CreateExam = () => {
           arr.push({
             id: prevQuestionsLength + i, // render ui 
             content:"",
-            choice: [
+            answers: [
               {
                 key:"a",
                 content:"",
@@ -112,14 +142,11 @@ const CreateExam = () => {
         <div className="bg-white p-4">
           <div className="flex items-center flex-wrap gap-[24px]">
             <div className="form_input ">
-              <label htmlFor="exam_name" className='title text-[14px]' >Tên đề</label>
-              <input type="text" placeholder='Nhập tên đề' id='exam_name' className='outline-none border rounded-[6px] px-[12px] py-[9px]' />
+              <label htmlFor="exam_code" className='title text-[14px] font-medium' >Mã đề</label>
+              <input type="text" placeholder='Nhập mã đề' id='exam_code' className='outline-none border rounded-[6px] px-[12px] py-[9px]' onChange={(e) => {
+                setExamCode(e.target.value)
+              }}/>
             </div>
-            <div className="form_input ">
-              <label htmlFor="exam_code" className='title text-[14px]' >Mã đề</label>
-              <input type="text" placeholder='Nhập mã đề' id='exam_code' className='outline-none border rounded-[6px] px-[12px] py-[9px]' />
-            </div>
-
           </div>
           <div className="exam_box mt-3 border rounded-[6px] p-3">
             <div className="flex items-center">
@@ -149,14 +176,7 @@ const CreateExam = () => {
                   
                 }}>OK</button>
               </div>
-              <div className="flex  mr-8 items-center gap-2">
-                <span className='text-[14px] font-medium title'>Tổng số điểm</span>
-                <input type="text" className='outline-none border rounded-[6px] px-[12px] py-[9px] w-[64px]'/>
-              </div>
-              <div className="flex  mr-8 items-center gap-2">
-                <span className='text-[14px] font-medium title'>Số điểm mỗi câu</span>
-                <span className='title text-[14px]'>1</span>
-              </div>
+      
             </div>
           </div>
           <div className="mt-5 mb-6">
@@ -170,7 +190,7 @@ const CreateExam = () => {
                               <div className="question_number w-6 mr-2"><span>{ques.id}</span></div>
                               <div className="flex items-center gap-3">
                                 {
-                                  ques.choice.map((c) => (<button type='button' key={`${index}_${c.key}`} className={`question_key rounded-[50%] h-[35px] w-[35px] border flex items-center justify-center uppercase ${c.isCorrect ? "bg-[#1e40ae] text-white" : "" }`}>{c.key}</button>))
+                                  ques.answers.map((c) => (<button type='button' key={`${index}_${c.key}`} className={`question_key rounded-[50%] h-[35px] w-[35px] border flex items-center justify-center uppercase ${c.isCorrect ? "bg-[#1e40ae] text-white" : "" }`}>{c.key}</button>))
                                 }
                                 
                                 {/* <Popover title="Thêm câu hỏi và đáp án" placement='right'>
@@ -188,6 +208,9 @@ const CreateExam = () => {
                 
               ))}
             </div>
+          </div>
+          <div className="flex justify-end w-full ">
+            <button className='px-5 py-2 rounded-full bg-[#1e40ae] text-white text-[14px]' onClick={handleCreateTest}>Tạo đề</button>
           </div>
         </div>
       </div>

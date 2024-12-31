@@ -4,7 +4,8 @@ import styled from "styled-components";
 const Loading = () => {
   return (
     <LoadingStyled>
-
+        <div className="fixed inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center">
                 <svg 
                     width="48px" 
                     className="azt-svg-loading jobing-j" 
@@ -17,6 +18,10 @@ const Loading = () => {
                     <path d="M39.6 90.3c-6.8 0-13.8.8-20.5-.2-9.7-1.4-15-12.8-10.3-21.3 5.9-10.9 12.1-21.6 18.5-32.2 5.5-9 18.6-8.7 24.2.2.7 1.1.8 1.9.1 3.1C46.7 48.3 42 57 36.8 65.3c-5.3 8.4-3.8 18.8 2.5 24.6.2 0 .2.3.3.4z" className="azt-svg-loading jobing-j"></path>
                     <path d="M32.5 27.3c3.3-5.7 6.1-11 9.4-16 5.9-9.1 19.4-9.2 25.1 0 6.5 10.4 12.6 21 18.3 31.7 4.8 9-1.5 19.9-11.5 20.7-1.6.1-2.6-.2-3.5-1.8-4.8-8.6-9.8-17.1-14.7-25.6-4.7-8.3-12.5-11.6-21.7-9.2-.3 0-.6 0-1.4.2z"></path>
                 </svg>
+                <span className='text-[14px] font-medium'>Đang load dữ liệu ...</span>
+            </div>
+
+        </div>
 
     </LoadingStyled>
   )

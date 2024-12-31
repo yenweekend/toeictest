@@ -49,6 +49,9 @@ body {
   background-color: #1e40ae !important;
   color: white;
 }
+.empty {
+  box-shadow: 0 3px 20px #0000000b;
+}
 /* .key_input {
   position: relative;
   display: inline-block;
@@ -67,4 +70,97 @@ body {
 }
 .bg-color {
   color: var(--bg-color);
+}
+/* ant progress custom  */
+.progress .ant-progress {
+  z-index: 99 !important;
+}
+.progress .ant-progress-text {
+  color: #4ad071 !important;
+  font-weight: bold;
+  position: relative;
+}
+.primary-color {
+  color: var(--primary-color);
+}
+.top_header {
+  border-bottom: 1px solid rgb(226, 232, 240);
+}
+.current_page {
+  position: relative;
+  color: #1e40ae;
+  background-color: rgb(241, 245, 249);
+}
+.current_page::before,
+.current_page::after {
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: transparent;
+  right: 15px;
+}
+.current_page::before {
+  box-shadow: 25px -25px 10px 0 rgb(241, 245, 249);
+  top: 100%;
+}
+.current_page::after {
+  bottom: 100%;
+  box-shadow: 25px 25px 10px 0 rgb(241, 245, 249);
+}
+.lesson {
+  border-left: 3px solid #1e40ae;
+}
+.lesson:not(:last-child) {
+  border-bottom: 1px solid #e9e9e9;
+}
+.checkmark {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  border-radius: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px;
+  border: 1px solid transparent;
+  z-index: 10;
+  background-color: #0cc021;
+}
+.is_check {
+  background-color: var(--bg-hover);
+}
+.true {
+  background-color: var(--true-color) !important;
+  color: white !important;
+}
+.wrong {
+  background-color: var(--wrong-color) !important;
+  color: white !important;
+}
+.quiz_key_view:hover {
+  background-color: var(--bg-hover);
+}
+.quiz_key_view input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.quiz_key_view label::after {
+  width: 24px;
+  height: 24px;
+  content: "";
+  position: absolute;
+  border-radius: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px;
+  border: 2px solid #000;
+  cursor: pointer;
+  z-index: 0;
+}
+.progress .ant-modal-footer button:nth-child(1) {
+  display: none !important;
 }

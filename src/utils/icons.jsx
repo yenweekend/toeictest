@@ -18,8 +18,30 @@ import { MdKeyboardDoubleArrowDown as doublearrowdown } from "react-icons/md";
 import { LuAlarmClock as clock } from "react-icons/lu";
 import { IoClose as close } from "react-icons/io5";
 import { FaCheck as check } from "react-icons/fa6";
+import { RiArrowUpSLine as arrowup } from "react-icons/ri";
+import { GoArrowRight  as arrowright} from "react-icons/go";
+import { SlCalender as calender } from "react-icons/sl";
+import { MdPersonOutline  as person} from "react-icons/md";
+import { FaRegFileLines as file } from "react-icons/fa6";
+import { RxUpdate  as ongo} from "react-icons/rx";
+import { AiOutlineSchedule  as schedule} from "react-icons/ai";
+import { FaCheck  as checkfill } from "react-icons/fa6";
+import { FaBarsProgress as progress } from "react-icons/fa6";
+import { MdContentCopy as copy } from "react-icons/md";
+import { VscCheck as vcheck } from "react-icons/vsc";
+import { FaHashtag  as hashtag} from "react-icons/fa6";
 
-const icons = {
+const icons = {progress,
+    vcheck,
+    hashtag,
+    copy,
+    checkfill,
+    schedule,
+    ongo,
+    file,
+    calender,
+    person,
+    arrowright,
     clock,
     doublearrowdown,
     teacher,
@@ -39,6 +61,7 @@ const icons = {
     search,
     reload,
     close,
-    check
+    check,
+    arrowup
 }
 export default icons;
